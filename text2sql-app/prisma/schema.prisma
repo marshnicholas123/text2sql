@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Table {
+  id               Int     @id @default(autoincrement())
+  table_name       String  @unique
+  table_description String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  fields           Field[]
+  
+  @@map("tables")
+}
+
+model Field {
+  id                 Int     @id @default(autoincrement())
+  field_name         String
+  field_description  String
+  data_type          String? @default("VARCHAR")
+  max_length         Int?
+  is_nullable        Boolean @default(true)
+  is_primary_key     Boolean @default(false)
+  is_unique          Boolean @default(false)
+  default_value      String?
+  tableId            Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  table              Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  
+  @@map("fields")
+}

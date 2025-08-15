@@ -1,0 +1,225 @@
+🏗️ Tech Stack Overview - Text2SQL Application
+
+================================================================================
+
+1. Next.js 15 - React Framework
+================================================================================
+Why: Full-stack React framework with built-in API routes, server-side rendering, and optimized performance.
+
+Files:
+- next.config.ts          # Next.js configuration
+- src/app/layout.tsx      # Root layout component
+- src/app/page.tsx        # Home page component
+- src/app/api/tables/route.ts  # API endpoint
+
+What it provides:
+- File-based routing (app/ directory)
+- API routes for backend functionality
+- Server-side rendering for better performance
+- Built-in optimization (images, fonts, bundles)
+
+================================================================================
+
+2. React 19 - UI Library
+================================================================================
+Why: Component-based UI library for building interactive interfaces.
+
+Files:
+- src/components/SimpleSchemaWizard.tsx  # Form component
+- src/components/DataViewer.tsx          # Data display component
+- src/app/page.tsx                       # Main page component
+- src/app/layout.tsx                     # Layout wrapper
+
+What it provides:
+- Component-based architecture
+- State management with hooks
+- Event handling for user interactions
+- Virtual DOM for efficient updates
+
+================================================================================
+
+3. TypeScript - Type Safety
+================================================================================
+Why: Adds static type checking to JavaScript, preventing runtime errors and improving developer experience.
+
+Files:
+- tsconfig.json           # TypeScript configuration
+- *.tsx files             # React components with types
+- *.ts files              # TypeScript modules
+- next-env.d.ts          # Next.js type definitions
+
+What it provides:
+- Compile-time error detection
+- IntelliSense and autocomplete
+- Interface definitions for data structures
+- Better refactoring capabilities
+
+================================================================================
+
+4. Tailwind CSS - Styling Framework
+================================================================================
+Why: Utility-first CSS framework for rapid UI development without writing custom CSS.
+
+Files:
+- tailwind.config.ts      # Tailwind configuration
+- postcss.config.mjs      # PostCSS configuration
+- src/app/globals.css     # Global styles with Tailwind imports
+
+What it provides:
+- Pre-built utility classes (bg-blue-600, text-lg, etc.)
+- Responsive design utilities
+- Consistent design system
+- Small bundle size (only used utilities)
+
+================================================================================
+
+5. Prisma ORM - Database Management
+================================================================================
+Why: Type-safe database ORM that generates client code and handles database operations.
+
+Files:
+- prisma/schema.prisma    # Database schema definition
+- src/lib/prisma.ts       # Prisma client configuration
+- prisma/dev.db          # SQLite database file (generated)
+- .env.local             # Database connection string
+
+What it provides:
+- Type-safe database queries
+- Database schema versioning
+- Automatic client generation
+- Migration management
+
+================================================================================
+
+6. SQLite - Database
+================================================================================
+Why: Lightweight, serverless database perfect for development and small applications.
+
+Files:
+- prisma/dev.db          # SQLite database file
+- prisma/schema.prisma   # Schema defining tables
+
+What it provides:
+- Zero-configuration database
+- ACID compliance
+- Small footprint
+- Perfect for Vercel deployment
+
+================================================================================
+
+7. Zod - Validation Library
+================================================================================
+Why: TypeScript-first schema validation for API inputs and form data.
+
+Files:
+- src/app/api/tables/route.ts  # API validation schemas
+
+What it provides:
+- Runtime type validation
+- Schema-based validation rules
+- Integration with TypeScript types
+- Error message generation
+
+================================================================================
+
+8. React Hook Form - Form Management
+================================================================================
+Why: Performant form library with minimal re-renders and easy validation.
+
+Files:
+- src/components/SimpleSchemaWizard.tsx  # Form implementation
+- package.json                           # Dependency declaration
+
+What it provides:
+- Form state management
+- Validation integration
+- Performance optimization
+- Dynamic field arrays
+
+================================================================================
+
+📁 File Structure & Responsibilities
+================================================================================
+
+Configuration Files:
+├── package.json           # Dependencies and scripts
+├── tsconfig.json         # TypeScript compiler settings
+├── tailwind.config.ts    # Tailwind CSS configuration
+├── next.config.ts        # Next.js settings
+├── postcss.config.mjs    # CSS processing
+├── eslint.config.mjs     # Code linting rules
+└── vercel.json          # Deployment configuration
+
+Database Layer:
+├── prisma/
+│   ├── schema.prisma     # Database models (Tables, Fields)
+│   └── dev.db           # SQLite database file
+├── src/lib/
+│   └── prisma.ts        # Database client singleton
+└── .env.local           # Environment variables
+
+API Layer:
+└── src/app/api/
+    └── tables/
+        └── route.ts     # REST API endpoints (GET, POST)
+
+UI Layer:
+├── src/app/
+│   ├── layout.tsx       # Root layout with metadata
+│   ├── page.tsx         # Home page composition
+│   └── globals.css      # Global styles
+└── src/components/
+    ├── SimpleSchemaWizard.tsx  # Form for creating schemas
+    └── DataViewer.tsx          # Display saved schemas
+
+================================================================================
+
+🔄 Data Flow Architecture
+================================================================================
+
+User Input (Form) 
+    ↓
+React Hook Form (Validation)
+    ↓
+API Route (/api/tables)
+    ↓
+Zod Validation
+    ↓
+Prisma ORM
+    ↓
+SQLite Database
+    ↓
+Response back through chain
+    ↓
+UI Update (React State)
+
+================================================================================
+
+🎯 Why This Stack?
+================================================================================
+
+Development Experience:
+- TypeScript: Catches errors before runtime
+- Next.js: Full-stack in one framework
+- Tailwind: Fast styling without context switching
+
+Performance:
+- React 19: Latest performance optimizations
+- Next.js 15: App Router for better loading
+- SQLite: Fast local database operations
+
+Deployment:
+- Vercel-Ready: All technologies work seamlessly on Vercel
+- Zero Config: Minimal deployment configuration needed
+- Serverless: Perfect for serverless functions
+
+Scalability:
+- Prisma: Easy to switch databases (PostgreSQL, MySQL)
+- Component Architecture: Reusable UI components
+- API Routes: Can be extracted to microservices
+
+================================================================================
+
+This stack provides a modern, type-safe, performant foundation for a text2SQL 
+application that can grow from a simple wizard to a full database management 
+platform.
