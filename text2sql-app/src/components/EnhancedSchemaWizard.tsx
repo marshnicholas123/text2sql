@@ -14,7 +14,10 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Check,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  Edit3,
+  Archive
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +27,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import CSVUploader from '@/components/CSVUploader'
+import CSVPreview from '@/components/CSVPreview'
+import SchemaBrowser from '@/components/SchemaBrowser'
+import { type CSVField } from '@/lib/csvUtils'
 
 // Enhanced field schema with data types and constraints
 const fieldSchema = z.object({
@@ -78,6 +85,10 @@ export default function EnhancedSchemaWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [inputMode, setInputMode] = useState<'manual' | 'csv' | 'schema'>('manual')
+  const [csvFields, setCsvFields] = useState<CSVField[]>([])
+  const [showCSVPreview, setShowCSVPreview] = useState(false)
+  const [selectedSchemaForImport, setSelectedSchemaForImport] = useState<any>(null)
 
   const { register, control, handleSubmit, formState: { errors }, reset, watch, trigger, setValue } = useForm<TableFormData>({
     resolver: zodResolver(tableSchema),
@@ -96,7 +107,7 @@ export default function EnhancedSchemaWizard() {
     mode: 'onChange'
   })
 
-  const { fields, append, remove, move } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: 'fields'
   })
@@ -155,11 +166,87 @@ export default function EnhancedSchemaWizard() {
     }
   }
 
+  const handleCSVParsed = (csvFieldsData: CSVField[]) => {
+    setCsvFields(csvFieldsData)
+    setShowCSVPreview(true)
+    
+    // Convert CSV fields to form fields with default values
+    const formFields: FieldData[] = csvFieldsData.map(csvField => ({
+      field_name: csvField.field_name,
+      field_description: csvField.field_description,
+      data_type: 'VARCHAR',
+      is_nullable: true,
+      is_primary_key: false,
+      is_unique: false,
+    }))
+    
+    // Clear existing fields and set the new ones
+    setValue('fields', formFields)
+  }
+
+  const switchToManualMode = () => {
+    setInputMode('manual')
+    setShowCSVPreview(false)
+    setSelectedSchemaForImport(null)
+  }
+
+  const editCSVFields = () => {
+    setInputMode('manual')
+    setShowCSVPreview(false)
+    // Fields are already loaded in the form from CSV
+  }
+
+  const handleSchemaSelected = (schema: any) => {
+    setSelectedSchemaForImport(schema)
+    
+    // Convert schema fields to form fields
+    const formFields: FieldData[] = schema.fields.map((field: any) => ({
+      field_name: field.field_name,
+      field_description: field.field_description,
+      data_type: field.data_type,
+      max_length: field.max_length,
+      is_nullable: field.is_nullable,
+      is_primary_key: field.is_primary_key,
+      is_unique: field.is_unique,
+      default_value: field.default_value,
+    }))
+    
+    // Set the fields in the form
+    setValue('fields', formFields)
+    
+    // Optionally pre-fill table name with a modified version
+    if (!watchedFields.table_name) {
+      setValue('table_name', `${schema.table_name}_copy`)
+    }
+    if (!watchedFields.table_description) {
+      setValue('table_description', `Copy of ${schema.table_description}`)
+    }
+  }
+
   const nextStep = async () => {
     let isValid = false
     
     if (currentStep === 1) {
-      isValid = await trigger(['table_name', 'table_description'])
+      // Validate table info
+      const tableInfoValid = await trigger(['table_name', 'table_description'])
+      
+      // Check if we have fields (either from manual entry or CSV)
+      const hasFields = watchedFields.fields && watchedFields.fields.length > 0 && 
+        watchedFields.fields.some(field => field.field_name?.trim())
+      
+      // For CSV mode, we need fields imported
+      if (inputMode === 'csv' && !hasFields) {
+        console.log('CSV mode but no fields imported yet')
+        return
+      }
+      
+      // For schema mode, we need a schema selected and fields imported
+      if (inputMode === 'schema' && !selectedSchemaForImport) {
+        console.log('Schema mode but no schema selected yet')
+        return
+      }
+      
+      isValid = tableInfoValid && (inputMode === 'manual' || hasFields || (inputMode === 'schema' && selectedSchemaForImport))
     } else if (currentStep === 2) {
       // Validate all fields
       isValid = await trigger('fields')
@@ -282,6 +369,78 @@ export default function EnhancedSchemaWizard() {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Field Input Method Selection */}
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-2">Choose Field Input Method</h3>
+                <p className="text-sm text-muted-foreground">Select how you want to define your table fields</p>
+              </div>
+              
+              <div className="flex justify-center gap-3">
+                <Button
+                  type="button"
+                  variant={inputMode === 'manual' ? 'default' : 'outline'}
+                  onClick={switchToManualMode}
+                  className="flex items-center gap-2"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Manual Entry
+                </Button>
+                <Button
+                  type="button"
+                  variant={inputMode === 'csv' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setInputMode('csv')
+                    setSelectedSchemaForImport(null)
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  CSV Upload
+                </Button>
+                <Button
+                  type="button"
+                  variant={inputMode === 'schema' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setInputMode('schema')
+                    setShowCSVPreview(false)
+                    setCsvFields([])
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Archive className="w-4 h-4" />
+                  Stored Schemas
+                </Button>
+              </div>
+
+              {inputMode === 'csv' && (
+                <div className="mt-6">
+                  <CSVUploader 
+                    onCSVParsed={handleCSVParsed}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
+
+              {showCSVPreview && csvFields.length > 0 && (
+                <div className="mt-6">
+                  <CSVPreview 
+                    fields={csvFields}
+                    onEditClick={editCSVFields}
+                  />
+                </div>
+              )}
+
+              {inputMode === 'schema' && (
+                <div className="mt-6">
+                  <SchemaBrowser 
+                    onSchemaSelect={handleSchemaSelected}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         )
@@ -554,7 +713,7 @@ export default function EnhancedSchemaWizard() {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit as any)}>
           <AnimatePresence mode="wait">
             {renderStepContent()}
           </AnimatePresence>
@@ -571,6 +730,22 @@ export default function EnhancedSchemaWizard() {
             </Button>
 
             <div className="flex flex-col items-end gap-2">
+              {currentStep === 1 && inputMode === 'csv' && !showCSVPreview && (
+                <div className="text-right">
+                  <p className="text-sm text-destructive">
+                    Please upload a CSV file to continue
+                  </p>
+                </div>
+              )}
+              
+              {currentStep === 1 && inputMode === 'schema' && !selectedSchemaForImport && (
+                <div className="text-right">
+                  <p className="text-sm text-destructive">
+                    Please select a schema to continue
+                  </p>
+                </div>
+              )}
+              
               {currentStep === 2 && watchedFields.fields.some(field => 
                 !field.field_name?.trim() || !field.field_description?.trim()
               ) && (
@@ -591,10 +766,12 @@ export default function EnhancedSchemaWizard() {
                   type="button" 
                   onClick={nextStep}
                   disabled={
-                    currentStep === 2 && 
+                    (currentStep === 1 && inputMode === 'csv' && !showCSVPreview) ||
+                    (currentStep === 1 && inputMode === 'schema' && !selectedSchemaForImport) ||
+                    (currentStep === 2 && 
                     watchedFields.fields.some(field => 
                       !field.field_name?.trim() || !field.field_description?.trim()
-                    )
+                    ))
                   }
                 >
                   Next
