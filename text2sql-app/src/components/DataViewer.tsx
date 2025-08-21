@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { RefreshCw, Database, Clock, FileText, Plus, Search } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import SchemaCard from '@/components/SchemaCard'
+import ProfileSchemaCard from '@/components/ProfileSchemaCard'
 
 interface Field {
   id: number
@@ -68,145 +67,123 @@ export default function DataViewer() {
 
   if (loading) {
     return (
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="w-5 h-5" />
-            Schema Library
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <RefreshCw className="w-5 h-5 animate-spin" />
-              <span>Loading schemas...</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-gray-500" />
+            <span className="text-sm text-gray-600">Loading schemas...</span>
+          </div>
+        </div>
+        {/* Loading skeleton cards */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+            <div className="h-24 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Card className="shadow-card border-destructive/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <Database className="w-5 h-5" />
-            Schema Library
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-destructive mb-4">Error: {error}</p>
-            <Button onClick={refreshData} variant="outline">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Retry
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8 bg-white rounded-xl shadow-sm border border-red-200">
+        <div className="text-red-600 mb-4">
+          <Database className="w-8 h-8 mx-auto mb-2" />
+          <p className="font-medium">Error loading schemas</p>
+          <p className="text-sm text-red-500">{error}</p>
+        </div>
+        <Button onClick={refreshData} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </Button>
+      </div>
     )
   }
 
   return (
-    <Card className="shadow-card">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5" />
-              Schema Library
-            </CardTitle>
-            <CardDescription>
-              Manage and explore your database schemas
-            </CardDescription>
+    <div className="space-y-4">
+      {/* Search and Controls */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Search schemas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 border-gray-300"
+          />
+        </div>
+        <Button onClick={refreshData} variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+          <RefreshCw className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Stats Summary */}
+      <div className="flex items-center gap-6 text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center gap-1">
+          <FileText className="w-4 h-4" />
+          <span>{tables.length} schemas</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Database className="w-4 h-4" />
+          <span>{tables.reduce((sum, table) => sum + table.fields.length, 0)} fields</span>
+        </div>
+        {tables.length > 0 && (
+          <div className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            <span>Updated {new Date(Math.max(...tables.map(t => new Date(t.updatedAt).getTime()))).toLocaleDateString()}</span>
           </div>
-          <Button onClick={refreshData} variant="outline" size="sm" className="gap-2">
-            <RefreshCw className="w-4 h-4" />
-            Refresh
+        )}
+      </div>
+
+      {/* Schema Cards */}
+      {tables.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <Database className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No schemas yet</h3>
+          <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+            Create your first database schema using the wizard to get started.
+          </p>
+          <Button variant="outline" className="gap-2 border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Plus className="w-4 h-4" />
+            Create Schema
           </Button>
         </div>
-
-        {/* Search and Stats */}
-        <div className="flex items-center justify-between gap-4 mt-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search schemas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+      ) : (
+        <div className="space-y-4">
+          {filteredTables.map((table) => (
+            <ProfileSchemaCard
+              key={table.id}
+              schema={{
+                id: table.id.toString(),
+                name: table.table_name,
+                description: table.table_description,
+                fieldCount: table.fields.length,
+                createdAt: new Date(table.createdAt),
+                lastModified: new Date(table.updatedAt),
+                status: 'active' // Default status, could be dynamic based on usage
+              }}
+              onEdit={(id) => console.log('Edit schema:', id)}
+              onDelete={(id) => console.log('Delete schema:', id)}
+              onExport={(id) => console.log('Export schema:', id)}
             />
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <FileText className="w-4 h-4" />
-              <span>{tables.length} schemas</span>
+          ))}
+          
+          {filteredTables.length === 0 && searchQuery && (
+            <div className="text-center py-8 bg-white rounded-xl shadow-sm border border-gray-200">
+              <p className="text-gray-600">
+                No schemas found matching &quot;{searchQuery}&quot;
+              </p>
             </div>
-            <div className="flex items-center gap-1">
-              <Database className="w-4 h-4" />
-              <span>{tables.reduce((sum, table) => sum + table.fields.length, 0)} fields</span>
-            </div>
-          </div>
+          )}
         </div>
-      </CardHeader>
-
-      <CardContent>
-        {tables.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Database className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">No schemas yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-              Create your first database schema using the wizard to get started.
-            </p>
-            <Button variant="outline" className="gap-2">
-              <Plus className="w-4 h-4" />
-              Create Schema
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredTables.map((table) => (
-              <SchemaCard
-                key={table.id}
-                schema={{
-                  id: table.id,
-                  table_name: table.table_name,
-                  table_description: table.table_description,
-                  created_at: table.createdAt,
-                  field_count: table.fields.length
-                }}
-                onEdit={(id) => console.log('Edit schema:', id)}
-                onDelete={(id) => console.log('Delete schema:', id)}
-              />
-            ))}
-            
-            {filteredTables.length === 0 && searchQuery && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No schemas found matching &quot;{searchQuery}&quot;
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {tables.length > 0 && (
-          <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <h3 className="font-medium text-foreground">Database Info</h3>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>Storage: <code className="bg-background px-1 rounded">prisma/dev.db</code></p>
-              <p>Last updated: {tables.length > 0 ? new Date(Math.max(...tables.map(t => new Date(t.updatedAt).getTime()))).toLocaleString() : 'Never'}</p>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }

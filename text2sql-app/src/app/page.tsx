@@ -1,52 +1,129 @@
+"use client";
+
 import EnhancedSchemaWizard from "@/components/EnhancedSchemaWizard";
 import DataViewer from "@/components/DataViewer";
 import Header from "@/components/Header";
+import UserProfilePanel from "@/components/UserProfilePanel";
+import SchemaStats from "@/components/SchemaStats";
+import { Database, BarChart3, Users } from "lucide-react";
 
 export default function Home() {
+  // Mock user data - in real app this would come from auth/database
+  const userData = {
+    name: "Alex Thompson",
+    role: "Database Architect",
+    organization: "TechCorp Solutions",
+    avatar: undefined
+  };
+
+  const userStats = {
+    totalSchemas: 24,
+    activeQueries: 156,
+    successRate: 94
+  };
+
+  // Header configuration
+  const headerActions = [
+    {
+      label: "Share",
+      variant: "secondary" as const,
+      onClick: () => console.log("Share clicked")
+    },
+    {
+      label: "Export All",
+      variant: "primary" as const,
+      onClick: () => console.log("Export clicked")
+    }
+  ];
+
+  const headerStatus = {
+    message: "All schemas synchronized",
+    type: "success" as const
+  };
+
+  // Stats data
+  const statsData = [
+    {
+      label: "Total Schemas",
+      value: 24,
+      icon: <Database className="w-4 h-4 text-blue-600" />,
+      change: { value: 12, type: "increase" as const },
+      description: "Active database schemas"
+    },
+    {
+      label: "Query Success Rate",
+      value: "94%",
+      icon: <BarChart3 className="w-4 h-4 text-green-600" />,
+      change: { value: 3, type: "increase" as const },
+      description: "SQL generation accuracy"
+    },
+    {
+      label: "Active Users",
+      value: 8,
+      icon: <Users className="w-4 h-4 text-purple-600" />,
+      change: { value: 2, type: "increase" as const },
+      description: "Team members using schemas"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <Header />
+    <div className="min-h-screen bg-gray-50">
+      <Header 
+        actions={headerActions}
+        status={headerStatus}
+      />
       
-      <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12 animate-fade-in">
-          <div className="mb-6">
-            <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
-              Text2SQL <span className="text-gradient">Studio</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Create and manage your database schemas for natural language to SQL conversion with our modern, intuitive interface
-            </p>
-          </div>
-          
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground mb-8">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span>Schema Designer</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span>CSV Import</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-              <span>Data Management</span>
-            </div>
-          </div>
+      <main className="container mx-auto px-6 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            Database Schema Management
+          </h1>
+          <p className="text-gray-600">
+            Create and manage your database schemas for natural language to SQL conversion
+          </p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="mb-8">
+          <SchemaStats stats={statsData} />
         </div>
         
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Schema Wizard Section */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="animate-slide-in">
+        {/* Main Content Grid - Professional Layout */}
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Primary Content - Schema Management */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Schema Creation Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Create New Schema</h2>
+                <p className="text-sm text-gray-600">
+                  Design your database schema with our intuitive form builder
+                </p>
+              </div>
               <EnhancedSchemaWizard />
             </div>
           </div>
           
-          {/* Data Viewer Section */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          {/* Sidebar Content - User Info & Data Viewer */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* User Profile Panel */}
+            <UserProfilePanel 
+              user={userData}
+              stats={userStats}
+              onCreateSchema={() => console.log("Create schema")}
+              onImportCSV={() => console.log("Import CSV")}
+              onExportAll={() => console.log("Export all")}
+            />
+            
+            {/* Data Viewer Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Schemas</h3>
+                <p className="text-sm text-gray-600">
+                  Manage and view your existing database schemas
+                </p>
+              </div>
               <DataViewer />
             </div>
           </div>

@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
+import { Plus, Trash2, Save } from 'lucide-react'
+import { z } from 'zod'
 
 const fieldSchema = z.object({
   field_name: z.string().min(1, 'Field name is required'),
