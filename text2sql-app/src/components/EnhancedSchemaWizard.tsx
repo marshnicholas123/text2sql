@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import CSVUploader from '@/components/CSVUploader'
@@ -319,7 +318,6 @@ export default function EnhancedSchemaWizard() {
     }
   }
 
-  const getStepProgress = () => (currentStep / WIZARD_STEPS.length) * 100
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -674,43 +672,75 @@ export default function EnhancedSchemaWizard() {
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <div className="flex justify-between items-center mb-4">
-          <CardTitle className="text-3xl">Database Schema Wizard</CardTitle>
-          <div className="text-sm text-muted-foreground">
-            Step {currentStep} of {WIZARD_STEPS.length}
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <Progress value={getStepProgress()} className="w-full" />
-          <div className="flex justify-between">
-            {WIZARD_STEPS.map((step) => (
-              <div
-                key={step.id}
-                className={cn(
-                  "flex flex-col items-center text-center flex-1",
-                  step.id <= currentStep ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-2",
-                    step.id < currentStep && "bg-primary text-primary-foreground",
-                    step.id === currentStep && "bg-primary text-primary-foreground",
-                    step.id > currentStep && "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {step.id < currentStep ? <Check className="w-4 h-4" /> : step.id}
+    <Card className="shadow-card border-0 overflow-hidden">
+      <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <CardHeader className="pb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                  <Database className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <div className="text-sm font-medium">{step.title}</div>
-                <div className="text-xs text-muted-foreground">{step.description}</div>
-              </div>
-            ))}
+                Schema Designer
+              </CardTitle>
+              <CardDescription className="text-base mt-2">
+                Create comprehensive database schemas with our intuitive step-by-step wizard
+              </CardDescription>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span>Step {currentStep} of {WIZARD_STEPS.length}</span>
+            </div>
           </div>
-        </div>
-      </CardHeader>
+          
+          {/* Modern Progress Indicator */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              {WIZARD_STEPS.map((step, index) => (
+                <div key={step.id} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 border-2",
+                      currentStep >= step.id 
+                        ? "bg-primary text-primary-foreground border-primary shadow-glow" 
+                        : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                    )}>
+                      {currentStep > step.id ? (
+                        <Check className="w-5 h-5" />
+                      ) : (
+                        step.id
+                      )}
+                    </div>
+                    <div className="mt-3 text-center">
+                      <div className={cn(
+                        "font-medium text-sm transition-colors",
+                        currentStep >= step.id ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {step.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 max-w-20">
+                        {step.description}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {index < WIZARD_STEPS.length - 1 && (
+                    <div className="flex-1 mx-4 mt-[-20px]">
+                      <div className={cn(
+                        "h-0.5 w-full transition-all duration-500",
+                        currentStep > step.id 
+                          ? "bg-gradient-to-r from-primary to-primary/60" 
+                          : "bg-border"
+                      )} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+      </div>
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit as any)}>
@@ -718,14 +748,15 @@ export default function EnhancedSchemaWizard() {
             {renderStepContent()}
           </AnimatePresence>
 
-          <div className="flex justify-between items-center mt-8 pt-6 border-t">
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-border/50">
             <Button
               type="button"
               variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1}
+              className="gap-2 hover:shadow-card-hover transition-all"
             >
-              <ChevronLeft className="w-4 h-4 mr-2" />
+              <ChevronLeft className="w-4 h-4" />
               Previous
             </Button>
 
@@ -773,15 +804,16 @@ export default function EnhancedSchemaWizard() {
                       !field.field_name?.trim() || !field.field_description?.trim()
                     ))
                   }
+                  className="gap-2 hover:shadow-card-hover transition-all"
                 >
                   Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
+                  <ChevronRight className="w-4 h-4" />
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-w-32"
+                  className="min-w-32 gap-2 hover:shadow-card-hover transition-all gradient-primary text-primary-foreground border-0"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
@@ -790,7 +822,7 @@ export default function EnhancedSchemaWizard() {
                     </div>
                   ) : (
                     <>
-                      <Save className="w-4 h-4 mr-2" />
+                      <Save className="w-4 h-4" />
                       Save Schema
                     </>
                   )}

@@ -1,6 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { RefreshCw, Database, Clock, FileText, Plus, Search } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import SchemaCard from '@/components/SchemaCard'
 
 interface Field {
   id: number
@@ -27,6 +32,7 @@ export default function DataViewer() {
   const [tables, setTables] = useState<TableData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const fetchTables = async () => {
     try {
@@ -55,122 +61,152 @@ export default function DataViewer() {
     fetchTables()
   }
 
+  const filteredTables = tables.filter(table => 
+    table.table_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    table.table_description.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Stored Database Schemas</h2>
-        <div className="text-center py-8">Loading...</div>
-      </div>
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-5 h-5" />
+            Schema Library
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              <span>Loading schemas...</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Stored Database Schemas</h2>
-        <div className="text-center py-8 text-red-600">Error: {error}</div>
-        <div className="text-center">
-          <button 
-            onClick={refreshData}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <Card className="shadow-card border-destructive/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Database className="w-5 h-5" />
+            Schema Library
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <p className="text-destructive mb-4">Error: {error}</p>
+            <Button onClick={refreshData} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Stored Database Schemas</h2>
-        <button 
-          onClick={refreshData}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Refresh
-        </button>
-      </div>
-
-      {tables.length === 0 ? (
-        <div className="text-center py-8 text-gray-600">
-          No tables found. Create your first table using the wizard above.
+    <Card className="shadow-card">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              Schema Library
+            </CardTitle>
+            <CardDescription>
+              Manage and explore your database schemas
+            </CardDescription>
+          </div>
+          <Button onClick={refreshData} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {tables.map((table) => (
-            <div key={table.id} className="border border-gray-200 rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-gray-900">{table.table_name}</h3>
-                <p className="text-gray-600 mt-1">{table.table_description}</p>
-                <div className="text-sm text-gray-500 mt-2">
-                  Created: {new Date(table.createdAt).toLocaleString()}
-                </div>
-              </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">
-                  Fields ({table.fields.length})
-                </h4>
-                <div className="space-y-2">
-                  {table.fields.map((field, index) => (
-                    <div key={field.id} className="bg-white p-3 rounded border">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900">
-                              {index + 1}. {field.field_name}
-                            </span>
-                            {field.data_type && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                {field.data_type}
-                              </span>
-                            )}
-                            {field.is_primary_key && (
-                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                PK
-                              </span>
-                            )}
-                            {field.is_unique && (
-                              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                                UNIQUE
-                              </span>
-                            )}
-                            {!field.is_nullable && (
-                              <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                                NOT NULL
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-gray-600 text-sm">
-                            {field.field_description}
-                          </p>
-                          {(field.max_length || field.default_value) && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {field.max_length && `Max length: ${field.max_length}`}
-                              {field.default_value && ` • Default: ${field.default_value}`}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* Search and Stats */}
+        <div className="flex items-center justify-between gap-4 mt-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search schemas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <FileText className="w-4 h-4" />
+              <span>{tables.length} schemas</span>
             </div>
-          ))}
+            <div className="flex items-center gap-1">
+              <Database className="w-4 h-4" />
+              <span>{tables.reduce((sum, table) => sum + table.fields.length, 0)} fields</span>
+            </div>
+          </div>
         </div>
-      )}
+      </CardHeader>
 
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-semibold text-gray-900 mb-2">Database Information</h3>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p>Total Tables: {tables.length}</p>
-          <p>Total Fields: {tables.reduce((sum, table) => sum + table.fields.length, 0)}</p>
-          <p>Database Location: <code className="bg-white px-1 rounded">prisma/dev.db</code></p>
-        </div>
-      </div>
-    </div>
+      <CardContent>
+        {tables.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+              <Database className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium text-foreground mb-2">No schemas yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              Create your first database schema using the wizard to get started.
+            </p>
+            <Button variant="outline" className="gap-2">
+              <Plus className="w-4 h-4" />
+              Create Schema
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredTables.map((table) => (
+              <SchemaCard
+                key={table.id}
+                schema={{
+                  id: table.id,
+                  table_name: table.table_name,
+                  table_description: table.table_description,
+                  created_at: table.createdAt,
+                  field_count: table.fields.length
+                }}
+                onEdit={(id) => console.log('Edit schema:', id)}
+                onDelete={(id) => console.log('Delete schema:', id)}
+              />
+            ))}
+            
+            {filteredTables.length === 0 && searchQuery && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No schemas found matching &quot;{searchQuery}&quot;
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {tables.length > 0 && (
+          <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-medium text-foreground">Database Info</h3>
+            </div>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>Storage: <code className="bg-background px-1 rounded">prisma/dev.db</code></p>
+              <p>Last updated: {tables.length > 0 ? new Date(Math.max(...tables.map(t => new Date(t.updatedAt).getTime()))).toLocaleString() : 'Never'}</p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
