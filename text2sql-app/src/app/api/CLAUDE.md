@@ -64,8 +64,65 @@ try {
 - Use consistent field naming conventions
 - Apply proper type coercion and defaults
 
+## API Endpoints
+
+### Table Schema Management
+**`/api/tables`** - Individual table schema operations
+
+- **POST**: Create new table schema with fields
+  - Request: `{ table_name, table_description, fields: [{ field_name, field_description, data_type, ... }] }`
+  - Response: `{ success: true, data: { table with fields } }`
+  - Validation: Unique table names, field name format, required fields
+
+- **GET**: Retrieve all table schemas with field details
+  - Response: `{ success: true, data: [{ table with fields }] }`
+  - Ordering: `createdAt: 'desc'` for consistent results
+
+### App Configuration Management  
+**`/api/app-configurations`** - Text2SQL application configuration operations
+
+- **POST**: Create new text2sql app configuration
+  - Request: `{ app_name, business_instructions, tableIds: [1, 2, 3] }`
+  - Response: `{ success: true, data: { app with tables and fields } }`
+  - Validation: Unique app names, minimum business instructions length, valid table IDs
+
+- **GET**: Retrieve all app configurations with associated tables
+  - Response: `{ success: true, data: [{ app with tables and fields }] }`
+  - Includes: Full table and field details for each associated table
+
+### Request Validation Schemas
+
+```typescript
+// Table Schema Validation
+const fieldSchema = z.object({
+  field_name: z.string().min(1).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/),
+  field_description: z.string().min(1),
+  data_type: z.enum(['VARCHAR', 'INT', 'BIGINT', 'DECIMAL', 'BOOLEAN', 'DATE', 'DATETIME', 'TEXT', 'JSON']).optional(),
+  max_length: z.number().optional(),
+  is_nullable: z.boolean().optional(),
+  is_primary_key: z.boolean().optional(),
+  is_unique: z.boolean().optional(),
+  default_value: z.string().optional(),
+})
+
+const tableSchema = z.object({
+  table_name: z.string().min(1).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/),
+  table_description: z.string().min(1),
+  fields: z.array(fieldSchema).min(1).max(50),
+})
+
+// App Configuration Validation
+const appConfigurationSchema = z.object({
+  app_name: z.string().min(1, 'App name is required'),
+  business_instructions: z.string().min(1, 'Business instructions are required'),
+  tableIds: z.array(z.number()).min(1, 'At least one table must be selected'),
+})
+```
+
 ### Security Considerations
-- Validate all input data
+- Validate all input data with Zod schemas
 - Use Prisma for SQL injection protection
+- Check table ID existence before creating associations
+- Verify unique constraints (table names, app names)
 - Log errors for debugging but avoid exposing sensitive data
 - Return generic error messages to clients
