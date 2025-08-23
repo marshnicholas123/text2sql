@@ -18,6 +18,7 @@ model Table {
   updatedAt        DateTime @updatedAt
   
   fields           Field[]
+  appConfigurations AppConfigurationTable[]
   
   @@map("tables")
 }
@@ -39,4 +40,29 @@ model Field {
   table              Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
   
   @@map("fields")
+}
+
+model AppConfiguration {
+  id                    Int     @id @default(autoincrement())
+  app_name              String  @unique
+  business_instructions String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  tables                AppConfigurationTable[]
+  
+  @@map("app_configurations")
+}
+
+model AppConfigurationTable {
+  id                   Int     @id @default(autoincrement())
+  appConfigurationId   Int
+  tableId              Int
+  createdAt            DateTime @default(now())
+  
+  appConfiguration     AppConfiguration @relation(fields: [appConfigurationId], references: [id], onDelete: Cascade)
+  table                Table       @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  
+  @@unique([appConfigurationId, tableId])
+  @@map("app_configuration_tables")
 }

@@ -2,12 +2,18 @@
 
 import EnhancedSchemaWizard from "@/components/EnhancedSchemaWizard";
 import DataViewer from "@/components/DataViewer";
+import AppConfigurationWizard from "@/components/AppConfigurationWizard";
+import AppConfigurationViewer from "@/components/AppConfigurationViewer";
 import Header from "@/components/Header";
 import UserProfilePanel from "@/components/UserProfilePanel";
 import SchemaStats from "@/components/SchemaStats";
-import { Database, BarChart3, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Database, BarChart3, Users, Settings } from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<'tables' | 'apps'>('tables')
+  
   // Mock user data - in real app this would come from auth/database
   const userData = {
     name: "Alex Thompson",
@@ -82,6 +88,26 @@ export default function Home() {
           <p className="text-gray-600">
             Create and manage your database schemas for natural language to SQL conversion
           </p>
+          
+          {/* Tab Navigation */}
+          <div className="mt-6 flex gap-2">
+            <Button
+              variant={activeTab === 'tables' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('tables')}
+              className="flex items-center gap-2"
+            >
+              <Database className="w-4 h-4" />
+              Individual Tables
+            </Button>
+            <Button
+              variant={activeTab === 'apps' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('apps')}
+              className="flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Text2SQL Apps
+            </Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -93,16 +119,29 @@ export default function Home() {
         <div className="grid lg:grid-cols-5 gap-8">
           {/* Primary Content - Schema Management */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Schema Creation Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Create New Schema</h2>
-                <p className="text-sm text-gray-600">
-                  Design your database schema with our intuitive form builder
-                </p>
+            {activeTab === 'tables' ? (
+              /* Individual Tables Tab */
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Create New Table Schema</h2>
+                  <p className="text-sm text-gray-600">
+                    Design your database table schema with our intuitive form builder
+                  </p>
+                </div>
+                <EnhancedSchemaWizard />
               </div>
-              <EnhancedSchemaWizard />
-            </div>
+            ) : (
+              /* Text2SQL Apps Tab */
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Configure Text2SQL App</h2>
+                  <p className="text-sm text-gray-600">
+                    Set up your text-to-SQL application by selecting relevant table schemas and providing business context
+                  </p>
+                </div>
+                <AppConfigurationWizard />
+              </div>
+            )}
           </div>
           
           {/* Sidebar Content - User Info & Data Viewer */}
@@ -111,7 +150,7 @@ export default function Home() {
             <UserProfilePanel 
               user={userData}
               stats={userStats}
-              onCreateSchema={() => console.log("Create schema")}
+              onCreateSchema={() => setActiveTab('tables')}
               onImportCSV={() => console.log("Import CSV")}
               onExportAll={() => console.log("Export all")}
             />
@@ -119,12 +158,17 @@ export default function Home() {
             {/* Data Viewer Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Schemas</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Your {activeTab === 'tables' ? 'Table Schemas' : 'Text2SQL Apps'}
+                </h3>
                 <p className="text-sm text-gray-600">
-                  Manage and view your existing database schemas
+                  {activeTab === 'tables' 
+                    ? 'Manage and view your existing database table schemas'
+                    : 'Manage your configured text2sql applications'
+                  }
                 </p>
               </div>
-              <DataViewer />
+              {activeTab === 'tables' ? <DataViewer /> : <AppConfigurationViewer />}
             </div>
           </div>
         </div>
