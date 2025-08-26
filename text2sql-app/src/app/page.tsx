@@ -4,15 +4,17 @@ import EnhancedSchemaWizard from "@/components/EnhancedSchemaWizard";
 import DataViewer from "@/components/DataViewer";
 import AppConfigurationWizard from "@/components/AppConfigurationWizard";
 import AppConfigurationViewer from "@/components/AppConfigurationViewer";
+import { Text2SQLQuery } from "@/components/Text2SQLQuery";
+import { Text2SQLHealth } from "@/components/Text2SQLHealth";
 import Header from "@/components/Header";
 import UserProfilePanel from "@/components/UserProfilePanel";
 import SchemaStats from "@/components/SchemaStats";
 import { Button } from "@/components/ui/button";
-import { Database, BarChart3, Users, Settings } from "lucide-react";
+import { Database, BarChart3, Users, Settings, MessageSquare } from "lucide-react";
 import { useState } from "react";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'tables' | 'apps'>('tables')
+  const [activeTab, setActiveTab] = useState<'tables' | 'apps' | 'query'>('tables')
   
   // Mock user data - in real app this would come from auth/database
   const userData = {
@@ -83,10 +85,16 @@ export default function Home() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-            Database Schema Management
+            {activeTab === 'query' 
+              ? 'Query Generator'
+              : 'Text2SQL Generator App'
+            }
           </h1>
           <p className="text-gray-600">
-            Create and manage your database schemas for natural language to SQL conversion
+            {activeTab === 'query'
+              ? 'Convert natural language questions into SQL queries using your configured business contexts'
+              : 'Enter your database schema details, set app name and business instructions to generate SQL from natural language'
+            }
           </p>
           
           {/* Tab Navigation */}
@@ -97,7 +105,7 @@ export default function Home() {
               className="flex items-center gap-2"
             >
               <Database className="w-4 h-4" />
-              Individual Tables
+              Schema Designer
             </Button>
             <Button
               variant={activeTab === 'apps' ? 'default' : 'outline'}
@@ -105,7 +113,15 @@ export default function Home() {
               className="flex items-center gap-2"
             >
               <Settings className="w-4 h-4" />
-              Text2SQL Apps
+              Text2SQL App Setup
+            </Button>
+            <Button
+              variant={activeTab === 'query' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('query')}
+              className="flex items-center gap-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Query Generator
             </Button>
           </div>
         </div>
@@ -124,13 +140,10 @@ export default function Home() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Create New Table Schema</h2>
-                  <p className="text-sm text-gray-600">
-                    Design your database table schema with our intuitive form builder
-                  </p>
                 </div>
                 <EnhancedSchemaWizard />
               </div>
-            ) : (
+            ) : activeTab === 'apps' ? (
               /* Text2SQL Apps Tab */
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="mb-6">
@@ -140,6 +153,11 @@ export default function Home() {
                   </p>
                 </div>
                 <AppConfigurationWizard />
+              </div>
+            ) : (
+              /* Text2SQL Query Tab */
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <Text2SQLQuery />
               </div>
             )}
           </div>
@@ -156,20 +174,27 @@ export default function Home() {
             />
             
             {/* Data Viewer Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Your {activeTab === 'tables' ? 'Table Schemas' : 'Text2SQL Apps'}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {activeTab === 'tables' 
-                    ? 'Manage and view your existing database table schemas'
-                    : 'Manage your configured text2sql applications'
-                  }
-                </p>
+            {activeTab !== 'query' && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Your {activeTab === 'tables' ? 'Table Schemas' : 'Text2SQL Apps'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {activeTab === 'tables' 
+                      ? 'Manage and view your existing database table schemas'
+                      : 'Manage your configured text2sql applications'
+                    }
+                  </p>
+                </div>
+                {activeTab === 'tables' ? <DataViewer /> : <AppConfigurationViewer />}
               </div>
-              {activeTab === 'tables' ? <DataViewer /> : <AppConfigurationViewer />}
-            </div>
+            )}
+
+            {/* Service Health for Query Tab */}
+            {activeTab === 'query' && (
+              <Text2SQLHealth />
+            )}
           </div>
         </div>
       </main>

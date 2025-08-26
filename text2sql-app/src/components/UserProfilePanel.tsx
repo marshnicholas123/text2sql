@@ -185,15 +185,6 @@ export default function UserProfilePanel({
         </div>
       </div>
 
-      {/* About Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">About</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">
-          Database schema architect specializing in natural language to SQL conversion. 
-          Focused on creating efficient, scalable database designs that enable seamless 
-          query generation and data accessibility.
-        </p>
-      </div>
     </div>
   );
 }

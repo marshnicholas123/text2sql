@@ -28,11 +28,7 @@ interface ProfessionalHeaderProps {
 }
 
 export default function Header({ 
-  breadcrumbs = [
-    { label: 'Text2SQL Studio' },
-    { label: 'Schemas' },
-    { label: 'Database Management' }
-  ],
+  breadcrumbs = [],
   actions = [],
   status
 }: ProfessionalHeaderProps) {
@@ -120,25 +116,27 @@ export default function Header({
         </div>
 
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 pb-4 pt-2">
-          {breadcrumbs.map((crumb, index) => (
-            <React.Fragment key={index}>
-              {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
-              {crumb.href ? (
-                <a 
-                  href={crumb.href}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {crumb.label}
-                </a>
-              ) : (
-                <span className={`text-sm ${index === breadcrumbs.length - 1 ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
-                  {crumb.label}
-                </span>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+        {breadcrumbs.length > 0 && (
+          <div className="flex items-center gap-2 pb-4 pt-2">
+            {breadcrumbs.map((crumb, index) => (
+              <React.Fragment key={index}>
+                {index > 0 && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                {crumb.href ? (
+                  <a 
+                    href={crumb.href}
+                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    {crumb.label}
+                  </a>
+                ) : (
+                  <span className={`text-sm ${index === breadcrumbs.length - 1 ? 'text-gray-900 font-medium' : 'text-gray-600'}`}>
+                    {crumb.label}
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
       </div>
     </header>
   )

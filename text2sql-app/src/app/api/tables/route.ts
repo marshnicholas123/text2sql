@@ -98,3 +98,42 @@ export async function GET() {
     )
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Table ID is required' },
+        { status: 400 }
+      )
+    }
+    
+    // Check if table exists
+    const existingTable = await prisma.table.findUnique({
+      where: { id: parseInt(id) }
+    })
+    
+    if (!existingTable) {
+      return NextResponse.json(
+        { error: 'Table not found' },
+        { status: 404 }
+      )
+    }
+    
+    // Delete table (fields will be deleted automatically due to cascade)
+    await prisma.table.delete({
+      where: { id: parseInt(id) }
+    })
+    
+    return NextResponse.json({ success: true, message: 'Table deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting table:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
