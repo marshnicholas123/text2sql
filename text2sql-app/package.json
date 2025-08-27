@@ -17,6 +17,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-toast": "^1.2.15",
     "@types/papaparse": "^5.3.16",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
@@ -27,6 +28,8 @@
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.62.0",
+    "react-syntax-highlighter": "^15.6.6",
+    "sql-formatter": "^15.6.6",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.0.17"
   },

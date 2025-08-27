@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { SQLCodeBlock } from '@/components/ui/SQLCodeBlock'
 import { ArrowLeft, Loader2, Database, Clock, Cpu, Copy, CheckCircle, AlertCircle, Send } from 'lucide-react'
 import { 
   text2sqlApi, 
@@ -290,12 +291,8 @@ export default function Text2SQLApp() {
                   {/* Generated SQL */}
                   {result.success && result.generated_sql && (
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Generated SQL</h4>
-                      <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-                        <pre className="text-green-400 text-sm font-mono whitespace-pre-wrap">
-                          {result.generated_sql}
-                        </pre>
-                      </div>
+                      <h4 className="font-medium text-gray-900 mb-3">Generated SQL</h4>
+                      <SQLCodeBlock sql={result.generated_sql} />
                     </div>
                   )}
 
