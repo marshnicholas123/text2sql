@@ -194,3 +194,8 @@ The application features a clean tab-based navigation system:
 - **Validation tests**: Form validation and error scenarios
 - **CRUD operation tests**: Database interaction testing for create, read, update, delete operations
 - **UI interaction tests**: Expandable components, navigation controls, and search functionality
+
+### Git Conventions
+- **Commit messages**: Write clear, descriptive commit messages without mentioning AI assistance
+- **Focused commits**: Keep commits atomic and focused on single features or fixes
+- **Branch naming**: Use descriptive branch names that reflect the feature or fix being worked on

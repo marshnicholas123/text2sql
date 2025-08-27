@@ -1,2 +1,5 @@
 # Exclude all JSON files
 *.json
+*.csv1+
+*.png
+/text2sql_prompt.txt
