@@ -190,22 +190,22 @@ export default function DataViewer() {
     <div className="space-y-4">
       {/* Expandable Header */}
       <div className="border border-gray-200 rounded-lg bg-white">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-3 text-left hover:bg-gray-50 transition-colors rounded p-2 -m-2 flex-1"
+          >
             {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
             <Database className="w-5 h-5 text-blue-600" />
             <div>
               <h3 className="font-medium text-gray-900">Your Table Schemas</h3>
               <p className="text-sm text-gray-500">{tables.length} schema{tables.length !== 1 ? 's' : ''} available</p>
             </div>
-          </div>
+          </button>
           <Button onClick={refreshData} variant="ghost" size="sm" className="hover:bg-gray-100">
             <RefreshCw className="w-4 h-4" />
           </Button>
-        </button>
+        </div>
         
         {isExpanded && (
           <div className="border-t border-gray-200 p-4 space-y-4">
