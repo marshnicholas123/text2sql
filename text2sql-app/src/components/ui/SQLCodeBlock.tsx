@@ -30,38 +30,13 @@ export function SQLCodeBlock({ sql, className = '' }: SQLCodeBlockProps) {
 
   const formattedSQL = formatSQL(sql.trim());
 
-  // Simple SQL syntax highlighting
-  const highlightSQL = (sqlCode: string) => {
-    if (!sqlCode) return '';
-    
-    let highlighted = sqlCode;
-    
-    // SQL Keywords (blue)
-    const keywords = [
-      'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN',
-      'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT', 'UPDATE', 'DELETE', 
-      'CREATE', 'DROP', 'ALTER', 'TABLE', 'DATABASE', 'INDEX', 'VIEW', 'UNION', 'DISTINCT',
-      'COUNT', 'SUM', 'AVG', 'MAX', 'MIN', 'AS', 'AND', 'OR', 'NOT', 'IN', 'EXISTS', 'LIKE',
-      'BETWEEN', 'IS', 'NULL', 'ON', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
-    ];
-    
-    keywords.forEach(keyword => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-      highlighted = highlighted.replace(regex, `<span class="text-blue-400 font-semibold">${keyword}</span>`);
-    });
-
-    // String literals (green)
-    highlighted = highlighted.replace(/'([^']*)'/g, '<span class="text-green-400">\'$1\'</span>');
-    highlighted = highlighted.replace(/"([^"]*)"/g, '<span class="text-green-400">"$1"</span>');
-
-    // Numbers (yellow)
-    highlighted = highlighted.replace(/\b\d+(\.\d+)?\b/g, '<span class="text-yellow-400">$&</span>');
-
-    // Comments (gray)
-    highlighted = highlighted.replace(/--.*$/gm, '<span class="text-gray-500 italic">$&</span>');
-    highlighted = highlighted.replace(/\/\*[\s\S]*?\*\//g, '<span class="text-gray-500 italic">$&</span>');
-
-    return highlighted;
+  // Render SQL with basic formatting (no syntax highlighting for now)
+  const renderFormattedSQL = (sqlCode: string) => {
+    return sqlCode.split('\n').map((line, index) => (
+      <div key={index}>
+        {line || '\u00A0'}
+      </div>
+    ));
   };
 
   const handleCopy = async () => {
@@ -99,13 +74,10 @@ export function SQLCodeBlock({ sql, className = '' }: SQLCodeBlockProps) {
 
       {/* Formatted SQL Code */}
       <div className="overflow-x-auto">
-        <pre className="text-sm font-mono whitespace-pre-wrap p-4 leading-relaxed text-gray-300">
-          <code 
-            className="sql-code"
-            dangerouslySetInnerHTML={{ 
-              __html: highlightSQL(formattedSQL) 
-            }} 
-          />
+        <pre className="text-sm font-mono p-4 leading-relaxed text-green-400">
+          <code className="sql-code">
+            {renderFormattedSQL(formattedSQL)}
+          </code>
         </pre>
       </div>
     </div>
