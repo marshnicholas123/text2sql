@@ -1,6 +1,6 @@
 import os
+import re
 from typing import Dict, Any, Optional, Tuple
-import json
 import time
 from abc import ABC, abstractmethod
 
@@ -147,6 +147,56 @@ class LLMService:
         self.providers = {}
         self._initialize_providers()
     
+    def _clean_html_tags(self, text: str) -> str:
+        """Remove HTML tags from text while preserving content"""
+        if not text:
+            return text
+        
+        # Remove HTML tags but keep the content
+        clean_text = re.sub(r'<[^>]+>', '', text)
+        
+        # Clean up common HTML entities
+        html_entities = {
+            '&lt;': '<',
+            '&gt;': '>',
+            '&amp;': '&',
+            '&quot;': '"',
+            '&#x27;': "'",
+            '&nbsp;': ' ',
+            '&ldquo;': '"',
+            '&rdquo;': '"',
+            '&lsquo;': "'",
+            '&rsquo;': "'",
+            '&mdash;': '—',
+            '&ndash;': '–'
+        }
+        
+        for entity, replacement in html_entities.items():
+            clean_text = clean_text.replace(entity, replacement)
+        
+        # Clean up extra whitespace that might result from removing tags
+        clean_text = re.sub(r'\s+', ' ', clean_text.strip())
+        
+        return clean_text
+    
+    def _clean_response_content(self, content: str) -> str:
+        """Clean and preprocess LLM response content"""
+        if not content:
+            return content
+        
+        # Remove HTML tags
+        cleaned_content = self._clean_html_tags(content)
+        
+        # Additional cleaning for common issues
+        # Remove excessive newlines
+        cleaned_content = re.sub(r'\n{3,}', '\n\n', cleaned_content)
+        
+        # Clean up markdown-style formatting that might be interpreted as HTML
+        cleaned_content = re.sub(r'\*\*(.*?)\*\*', r'\1', cleaned_content)  # Remove bold
+        cleaned_content = re.sub(r'\*(.*?)\*', r'\1', cleaned_content)      # Remove italic
+        
+        return cleaned_content.strip()
+    
     def _initialize_providers(self):
         """Initialize available LLM providers"""
         # Initialize OpenAI provider
@@ -191,6 +241,9 @@ class LLMService:
     
     def extract_sql_from_response(self, response: str) -> Tuple[Optional[str], Optional[str]]:
         """Extract SQL query and explanation from LLM response"""
+        # First clean the response content
+        cleaned_response = self._clean_response_content(response)
+        
         # Try to find SQL query in the response
         sql_patterns = [
             r'SQLQuery:\s*(.+?)(?=\n\nSQLResult:|$)',
@@ -201,10 +254,11 @@ class LLMService:
         
         sql_query = None
         for pattern in sql_patterns:
-            import re
-            match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+            match = re.search(pattern, cleaned_response, re.DOTALL | re.IGNORECASE)
             if match:
                 sql_query = match.group(1).strip()
+                # Clean the SQL query as well
+                sql_query = self._clean_html_tags(sql_query)
                 break
         
         # Try to find explanation/answer
@@ -216,10 +270,11 @@ class LLMService:
         
         explanation = None
         for pattern in explanation_patterns:
-            import re
-            match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+            match = re.search(pattern, cleaned_response, re.DOTALL | re.IGNORECASE)
             if match:
                 explanation = match.group(1).strip()
+                # Clean the explanation thoroughly
+                explanation = self._clean_html_tags(explanation)
                 break
         
         return sql_query, explanation

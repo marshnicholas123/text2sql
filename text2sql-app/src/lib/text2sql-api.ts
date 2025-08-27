@@ -219,8 +219,8 @@ export function getConfiguredProviders(health: HealthCheckResponse): string[] {
   if (!health.components?.llm?.providers) return []
   
   return Object.entries(health.components.llm.providers)
-    .filter(([_, provider]) => provider.configured && provider.status === 'ready')
-    .map(([name, _]) => name)
+    .filter(([, provider]) => provider.configured && provider.status === 'ready')
+    .map(([name]) => name)
 }
 
 export function formatExecutionTime(ms?: number): string {
@@ -233,8 +233,3 @@ export function formatExecutionTime(ms?: number): string {
   }
 }
 
-export function formatTokenUsage(metadata?: { tokens_used?: number }): string {
-  if (!metadata?.tokens_used) return 'N/A'
-  
-  return `${metadata.tokens_used.toLocaleString()} tokens`
-}

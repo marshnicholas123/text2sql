@@ -86,13 +86,13 @@ export default function Home() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             {activeTab === 'query' 
-              ? 'Query Generator'
+              ? 'App Load'
               : 'Text2SQL Generator App'
             }
           </h1>
           <p className="text-gray-600">
             {activeTab === 'query'
-              ? 'Convert natural language questions into SQL queries using your configured business contexts'
+              ? 'Select your app configuration and launch the Text2SQL application'
               : 'Enter your database schema details, set app name and business instructions to generate SQL from natural language'
             }
           </p>
@@ -121,7 +121,7 @@ export default function Home() {
               className="flex items-center gap-2"
             >
               <MessageSquare className="w-4 h-4" />
-              Query Generator
+              App Load
             </Button>
           </div>
         </div>
