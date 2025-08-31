@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { format } from 'sql-formatter';
 import { Copy, Check } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface SQLCodeBlockProps {
   sql: string;
@@ -30,14 +32,6 @@ export function SQLCodeBlock({ sql, className = '' }: SQLCodeBlockProps) {
 
   const formattedSQL = formatSQL(sql.trim());
 
-  // Render SQL with basic formatting (no syntax highlighting for now)
-  const renderFormattedSQL = (sqlCode: string) => {
-    return sqlCode.split('\n').map((line, index) => (
-      <div key={index}>
-        {line || '\u00A0'}
-      </div>
-    ));
-  };
 
   const handleCopy = async () => {
     try {
@@ -74,11 +68,24 @@ export function SQLCodeBlock({ sql, className = '' }: SQLCodeBlockProps) {
 
       {/* Formatted SQL Code */}
       <div className="overflow-x-auto">
-        <pre className="text-sm font-mono p-4 leading-relaxed text-green-400">
-          <code className="sql-code">
-            {renderFormattedSQL(formattedSQL)}
-          </code>
-        </pre>
+        <SyntaxHighlighter
+          language="sql"
+          style={vscDarkPlus}
+          customStyle={{
+            margin: 0,
+            padding: '1rem',
+            background: 'transparent',
+            fontSize: '0.875rem',
+            lineHeight: '1.625'
+          }}
+          codeTagProps={{
+            style: {
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+            }
+          }}
+        >
+          {formattedSQL}
+        </SyntaxHighlighter>
       </div>
     </div>
   );
